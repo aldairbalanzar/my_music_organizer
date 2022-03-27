@@ -3,11 +3,11 @@ import shutil
 
 music_dir = ""
 source_dir = "./bpmsupreme"
-practice_dir = "./practiceDir"
+practice_dir = "./practice_dir"
 artist_cache = {}
 files = os.listdir(source_dir)
 
-def make_song_path_to_music(song):
+def make_song_path_to_folder(song):
     song_path = os.path.join(practice_dir, song)
     return song_path
 
@@ -64,5 +64,5 @@ def do_tasks(song_list, source, practice_setting=True):
 
         move_song_to_dir(source_path, destination_path)
 
-do_tasks(files, source_dir, False)
+do_tasks(files, source_dir)
 
