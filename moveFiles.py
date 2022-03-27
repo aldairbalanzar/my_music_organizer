@@ -1,14 +1,14 @@
 import os
 import shutil
 
-music_dir = "C:/Users/aldai/Music/Music/"
-source = "./djcity"
+music_dir = ""
+source_dir = "./bpmsupreme"
 practice_dir = "./practiceDir"
 artist_cache = {}
-files = os.listdir(source)
+files = os.listdir(source_dir)
 
 def make_song_path_to_music(song):
-    song_path = os.path.join(music_dir, song)
+    song_path = os.path.join(practice_dir, song)
     return song_path
 
 def make_artist_cache(song):
@@ -19,45 +19,50 @@ def make_artist_cache(song):
     if artist not in artist_cache:
         artist_cache[artist] = []
         return artist
-    if song not in artist_cache[artist]:
-        song_path = make_song_path_to_music(song)
-        artist_cache[artist].append(song_path)
-        return artist
+    return artist
 
 def strip_artist_name(source, song):
     new_name = song.partition("-")[2].lstrip()
-    os.rename("./{}/{}".format(source, song), "./{}/{}".format(source, new_name))
+    try:
+        os.rename(f"./{source}/{song}", f"./{source}/{new_name}")
+    except:
+        pass
     return new_name
 
 
-def make_dir_in_music(cache):
+def make_dir_in_folder(cache, practice_setting):
     for name in cache:
-        dir_path = os.path.join("./renamed/", name)
-        if os.path.exists(dir_path):
-            print("EXISTS")
+        if practice_setting is True:
+            dir_path = os.path.join(f"{practice_dir}/", name)
         else:
-            print("{} DOES NOT exist".format(name))
+            dir_path = os.path.join(f"{music_dir}/", name)
+
+        if os.path.exists(dir_path):
+            pass
+        else:
             os.mkdir(dir_path)
 
 def move_song_to_dir(source, path):
-    shutil.move(source, path)
+    try:
+        shutil.move(source, path)
+    except:
+        pass
 
-for song in files:
-    artist = make_artist_cache(song)
-    new_name = strip_artist_name(source, song)
-    make_dir_in_music(artist_cache)
-    move_song_to_dir("./{}/{}".format(source, new_name), "{}/{}".format(music_dir, artist))
-    
+def do_tasks(song_list, source, practice_setting=True):
 
+    for song in song_list:
+        artist = make_artist_cache(song)
+        new_name = strip_artist_name(source, song)
 
+        make_dir_in_folder(artist_cache, practice_setting)
 
+        source_path = f"{source}/{new_name}"
+        if practice_setting is True:
+            destination_path = f"{practice_dir}/{artist}"
+        else:
+            destination_path = f"{music_dir}/{artist}"
 
-# for f in files:
-#     source_path = os.path.join(source, f)
+        move_song_to_dir(source_path, destination_path)
 
-#     if os.path.exists(path):
-#         print('this dir exists')
-#     else:
-#         print("this path doesnt exist")
-#         os.mkdir(path)
-#         shutil.move("./djcity/{}".format(f), "./practiceDir/{}".format(f))
+do_tasks(files, source_dir, False)
+
