@@ -7,8 +7,12 @@ practice_dir = "./practice_dir"
 artist_cache = {}
 files = os.listdir(source_dir)
 
-def make_song_path_to_folder(song):
-    song_path = os.path.join(practice_dir, song)
+def make_song_path_to_folder(song, practice_setting):
+    if practice_setting is True:
+        song_path = os.path.join(practice_dir, song)
+    else:
+        song_path = os.path.join(music_dir, song)
+
     return song_path
 
 def make_artist_cache(song):
