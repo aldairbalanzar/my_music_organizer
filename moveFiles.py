@@ -1,7 +1,7 @@
 import os
 import shutil
 
-music_dir = ""
+music_dir = "C:/Users/aldai/Music/Music/"
 source_dir = "./bpmsupreme"
 practice_dir = "./practice_dir"
 artist_cache = {}
@@ -68,5 +68,25 @@ def do_tasks(song_list, source, practice_setting=True):
 
         move_song_to_dir(source_path, destination_path)
 
-do_tasks(files, source_dir)
+def check_for_empty_folders(path):
+    dirs = list_of_dirs(path)
+    dir_files = list_of_files(path)
+    if(len(dirs) == 0 and len(dir_files) == 0):
+        print(f'DELETING: {path}')
+        os.rmdir(path)
+        return
 
+    for d in dirs:
+        dir_path = f'{path}/{d}'
+        check_for_empty_folders(dir_path)
+
+
+def list_of_dirs(path):
+    return [x.name for x in os.scandir(path) if x.is_dir()]
+
+def list_of_files(path):
+    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+
+# do_tasks(files, source_dir, False)
+check_for_empty_folders(music_dir)
