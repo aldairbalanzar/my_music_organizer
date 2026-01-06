@@ -1,7 +1,7 @@
 import os
 import shutil
 
-music_dir = "C:/Users/aldai/Music/Music/"
+music_dir = "/Volumes/main_music/_aldair_music"
 source_dir = "./bpmsupreme"
 practice_dir = "./practice_dir"
 artist_cache = {}
@@ -28,6 +28,7 @@ def make_artist_cache(song):
 def strip_artist_name(source, song):
     new_name = song.partition("-")[2].lstrip()
     try:
+        print(f'Renaming: {song} to {new_name}')
         os.rename(f"./{source}/{song}", f"./{source}/{new_name}")
     except:
         pass
@@ -40,15 +41,16 @@ def make_dir_in_folder(cache, practice_setting):
             dir_path = os.path.join(f"{practice_dir}/", name)
         else:
             dir_path = os.path.join(f"{music_dir}/", name)
-
+    
+        print(f'current dir: {dir_path}')
         if os.path.exists(dir_path):
             pass
         else:
             os.mkdir(dir_path)
 
-def move_song_to_dir(source, path):
+def copy_song_to_dir(source, path):
     try:
-        shutil.move(source, path)
+        shutil.copy(source, path)
     except:
         pass
 
@@ -66,8 +68,9 @@ def do_tasks(song_list, source, practice_setting=True):
         else:
             destination_path = f"{music_dir}/{artist}"
 
-        move_song_to_dir(source_path, destination_path)
+        copy_song_to_dir(source_path, destination_path)
 
+# empty dirs cleanup script
 def check_for_empty_folders(path):
     dirs = list_of_dirs(path)
     dir_files = list_of_files(path)
@@ -88,5 +91,5 @@ def list_of_files(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
-# do_tasks(files, source_dir, False)
-check_for_empty_folders(music_dir)
+do_tasks(files, source_dir, False)
+# check_for_empty_folders(music_dir)
