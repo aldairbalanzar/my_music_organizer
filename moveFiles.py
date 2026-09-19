@@ -8,6 +8,12 @@ practice_dir = "./practice_dir"
 artist_cache = {}
 files = os.listdir(source_dir)
 
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+BLUE = '\033[34m'
+RESET = '\033[0m'  # Resets the terminal color back to default
+
 
 def make_song_path_to_folder(song, practice_setting):
     if practice_setting is True:
@@ -99,7 +105,7 @@ def copy_song_to_dir(source, path):
 
     # Skip the file if it already exists.
     if os.path.exists(destination):
-        print(f"Already exists: {destination}")
+        print(f"{YELLOW}Already exists: {destination}{RESET}")
         return False
 
     try:
@@ -110,7 +116,7 @@ def copy_song_to_dir(source, path):
         return True
 
     except Exception as e:
-        print(f"Error copying {source}: {e}")
+        print(f"{RED}Error copying {source}: {e}{RESET}")
         return False
 
 
@@ -158,6 +164,9 @@ def do_tasks(song_list, source, practice_setting=True):
             source_path,
             destination_path
         )
+
+        print(f"{BLUE}{new_name}{RESET}")
+
 
 
 # -------------------------------------------
@@ -216,6 +225,8 @@ do_tasks(
     source_dir,
     False
 )
+
+print(f"{GREEN}Done moving files.{RESET}")
 
 # Uncomment when you want to clean up empty folders.
 # check_for_empty_folders(music_dir)
