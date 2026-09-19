@@ -90,7 +90,7 @@ def make_dir_in_folder(cache, practice_setting):
         else:
             dir_path = os.path.join(music_dir, name)
 
-        print(f"Current dir: {dir_path}")
+        # print(f"Current dir: {dir_path}")
 
         # makedirs is safer than mkdir because it can
         # create parent directories if necessary.
@@ -111,7 +111,7 @@ def copy_song_to_dir(source, path):
     try:
         shutil.copy2(source, path)
 
-        print(f"Copied: {source} -> {path}")
+        print(f"{YELLOW}Copied:{RESET} {source} {YELLOW}->{RESET} {path}")
 
         return True
 
@@ -164,8 +164,6 @@ def do_tasks(song_list, source, practice_setting=True):
             source_path,
             destination_path
         )
-
-        print(f"{BLUE}{new_name}{RESET}")
 
 
 
