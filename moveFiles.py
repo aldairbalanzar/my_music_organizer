@@ -66,7 +66,7 @@ def strip_artist_name(source, song):
     new_path = os.path.join(source, new_name)
 
     try:
-        print(f"Renaming: {song} -> {new_name}")
+        print(f"{YELLOW}Renaming:{RESET} {song} {YELLOW}->{RESET} {new_name}{RESET}")
 
         # Don't overwrite an existing file.
         if os.path.exists(new_path):
