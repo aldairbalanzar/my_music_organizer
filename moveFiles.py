@@ -4,8 +4,10 @@ import shutil
 music_dir = "/Volumes/main_music/_aldair_music"
 source_dir = "./bpmsupreme"
 practice_dir = "./practice_dir"
+
 artist_cache = {}
 files = os.listdir(source_dir)
+
 
 def make_song_path_to_folder(song, practice_setting):
     if practice_setting is True:
@@ -15,81 +17,205 @@ def make_song_path_to_folder(song, practice_setting):
 
     return song_path
 
+
 def make_artist_cache(song):
-    artist = song.partition("-")[0]
-    artist = artist.rstrip()
-    artist = artist.partition("ft")[0]
-    artist = artist.rstrip()
+    # BPM Supreme format:
+    # Artist - Song Title.mp3
+    #
+    # Split specifically on " - " so artists like
+    # Jay-Z and T-Pain don't get split incorrectly.
+    parts = song.split(" - ", 1)
+
+    if len(parts) != 2:
+        print(f"Could not determine artist from: {song}")
+        return None
+
+    artist = parts[0].strip()
+
+    # Remove featured artist from folder name.
+    #
+    # Example:
+    # Icona Pop ft Charli XCX
+    # becomes:
+    # Icona Pop
+    artist = artist.split(" ft ", 1)[0].strip()
+
     if artist not in artist_cache:
         artist_cache[artist] = []
-        return artist
+
     return artist
 
+
 def strip_artist_name(source, song):
-    new_name = song.partition("-")[2].lstrip()
+    # Split only on BPM Supreme's artist/title separator.
+    parts = song.split(" - ", 1)
+
+    if len(parts) != 2:
+        print(f"Could not parse filename: {song}")
+        return song
+
+    new_name = parts[1].strip()
+
+    old_path = os.path.join(source, song)
+    new_path = os.path.join(source, new_name)
+
     try:
-        print(f'Renaming: {song} to {new_name}')
-        os.rename(f"./{source}/{song}", f"./{source}/{new_name}")
-    except:
-        pass
+        print(f"Renaming: {song} -> {new_name}")
+
+        # Don't overwrite an existing file.
+        if os.path.exists(new_path):
+            print(f"File already exists: {new_path}")
+            return new_name
+
+        os.rename(old_path, new_path)
+
+    except Exception as e:
+        print(f"Error renaming {song}: {e}")
+        return song
+
     return new_name
 
 
 def make_dir_in_folder(cache, practice_setting):
     for name in cache:
+
         if practice_setting is True:
-            dir_path = os.path.join(f"{practice_dir}/", name)
+            dir_path = os.path.join(practice_dir, name)
         else:
-            dir_path = os.path.join(f"{music_dir}/", name)
-    
-        print(f'current dir: {dir_path}')
-        if os.path.exists(dir_path):
-            pass
-        else:
-            os.mkdir(dir_path)
+            dir_path = os.path.join(music_dir, name)
+
+        print(f"Current dir: {dir_path}")
+
+        # makedirs is safer than mkdir because it can
+        # create parent directories if necessary.
+        os.makedirs(dir_path, exist_ok=True)
+
 
 def copy_song_to_dir(source, path):
+    destination = os.path.join(
+        path,
+        os.path.basename(source)
+    )
+
+    # Skip the file if it already exists.
+    if os.path.exists(destination):
+        print(f"Already exists: {destination}")
+        return False
+
     try:
-        shutil.copy(source, path)
-    except:
-        pass
+        shutil.copy2(source, path)
+
+        print(f"Copied: {source} -> {path}")
+
+        return True
+
+    except Exception as e:
+        print(f"Error copying {source}: {e}")
+        return False
+
 
 def do_tasks(song_list, source, practice_setting=True):
 
     for song in song_list:
+
+        # Ignore folders and other non-file items.
+        original_source_path = os.path.join(source, song)
+
+        if not os.path.isfile(original_source_path):
+            continue
+
         artist = make_artist_cache(song)
+
+        # Skip filenames that don't match:
+        # Artist - Song.mp3
+        if artist is None:
+            continue
+
         new_name = strip_artist_name(source, song)
 
-        make_dir_in_folder(artist_cache, practice_setting)
+        make_dir_in_folder(
+            artist_cache,
+            practice_setting
+        )
 
-        source_path = f"{source}/{new_name}"
+        source_path = os.path.join(
+            source,
+            new_name
+        )
+
         if practice_setting is True:
-            destination_path = f"{practice_dir}/{artist}"
+            destination_path = os.path.join(
+                practice_dir,
+                artist
+            )
         else:
-            destination_path = f"{music_dir}/{artist}"
+            destination_path = os.path.join(
+                music_dir,
+                artist
+            )
 
-        copy_song_to_dir(source_path, destination_path)
+        copy_song_to_dir(
+            source_path,
+            destination_path
+        )
 
-# empty dirs cleanup script
+
+# -------------------------------------------
+# Empty directory cleanup
+# -------------------------------------------
+
 def check_for_empty_folders(path):
+
     dirs = list_of_dirs(path)
     dir_files = list_of_files(path)
-    if(len(dirs) == 0 and len(dir_files) == 0):
-        print(f'DELETING: {path}')
+
+    if len(dirs) == 0 and len(dir_files) == 0:
+
+        print(f"DELETING: {path}")
+
         os.rmdir(path)
+
         return
 
     for d in dirs:
-        dir_path = f'{path}/{d}'
+
+        dir_path = os.path.join(
+            path,
+            d
+        )
+
         check_for_empty_folders(dir_path)
 
 
 def list_of_dirs(path):
-    return [x.name for x in os.scandir(path) if x.is_dir()]
+
+    return [
+        x.name
+        for x in os.scandir(path)
+        if x.is_dir()
+    ]
+
 
 def list_of_files(path):
-    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+    return [
+        f
+        for f in os.listdir(path)
+        if os.path.isfile(
+            os.path.join(path, f)
+        )
+    ]
 
 
-do_tasks(files, source_dir, False)
+# -------------------------------------------
+# Run
+# -------------------------------------------
+
+do_tasks(
+    files,
+    source_dir,
+    False
+)
+
+# Uncomment when you want to clean up empty folders.
 # check_for_empty_folders(music_dir)
